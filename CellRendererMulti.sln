@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellRendererMulti", "CellRendererMulti\CellRendererMulti.csproj", "{10750FC6-7FE9-49C8-9384-2996DA17C3D6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{898D02F5-A083-4332-9793-91D1F8EFC3D1}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +18,8 @@ Global
 		{10750FC6-7FE9-49C8-9384-2996DA17C3D6}.Debug|x86.Build.0 = Debug|x86
 		{10750FC6-7FE9-49C8-9384-2996DA17C3D6}.Release|x86.ActiveCfg = Release|x86
 		{10750FC6-7FE9-49C8-9384-2996DA17C3D6}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = CellRendererMulti\CellRendererMulti.csproj
