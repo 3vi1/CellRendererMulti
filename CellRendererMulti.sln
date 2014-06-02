@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellRendererMulti", "CellRendererMulti\CellRendererMulti.csproj", "{10750FC6-7FE9-49C8-9384-2996DA17C3D6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10750FC6-7FE9-49C8-9384-2996DA17C3D6}.Debug|x86.ActiveCfg = Debug|x86
+		{10750FC6-7FE9-49C8-9384-2996DA17C3D6}.Debug|x86.Build.0 = Debug|x86
+		{10750FC6-7FE9-49C8-9384-2996DA17C3D6}.Release|x86.ActiveCfg = Release|x86
+		{10750FC6-7FE9-49C8-9384-2996DA17C3D6}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = CellRendererMulti\CellRendererMulti.csproj
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = None
+		$1.ResourceNamePolicy = FileFormatDefault
+	EndGlobalSection
+EndGlobal
