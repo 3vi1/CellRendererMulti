@@ -17,7 +17,7 @@
         <property name="MemberName" />
         <property name="ShadowType">In</property>
         <child>
-          <widget class="Gtk.NodeView" id="nodeview1">
+          <widget class="Gtk.NodeView" id="nodeView">
             <property name="MemberName" />
             <property name="CanFocus">True</property>
             <property name="ShowScrollbars">True</property>

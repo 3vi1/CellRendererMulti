@@ -6,13 +6,30 @@ using Gtk;
 
 namespace EternalDusk
 {
+	/// <summary>
+	/// These are the types of cells our renderer supports.
+	/// </summary>
+	public enum CellType
+	{
+		Combo,
+		Text
+	}
+
+
 	public class CellRendererMulti : CellRenderer
 	{
-		public CellType CellType	{ get; set; }
-		public bool Editable 		{ get; set; }
-		public EditedHandler Edited	{ get; set; }
-		public TreeModel Model 		{ get; set; }
-		public int TextColumn		{ get; set; }
+		public CellType CellType		{ get; set; }
+		public bool Editable 			{ get; set; }
+
+		private event EditedHandler edited;
+		public event EditedHandler Edited
+		{ 
+			add 	{ edited += value; }
+			remove	{ edited -= value; } 
+		}
+
+		public TreeModel Model 			{ get; set; }
+		public int TextColumn			{ get; set; }
 
 		[GLib.Property ("text")]
 		public string Text 		{ get; set; }
@@ -27,6 +44,7 @@ namespace EternalDusk
 		{
 			base.GetSize (widget, ref cell_area, out x_offset, out y_offset, out width, out height);
 			width = 150;
+			// TODO:  Autogrow
 		}
 
 		public override CellEditable StartEditing(
@@ -37,19 +55,29 @@ namespace EternalDusk
 			Rectangle cellArea,
 			CellRendererState flags
 		) {
-			return Renderer.StartEditing(editEvent, widget, path, background, cellArea, flags);
+			return Renderer.StartEditing(
+				editEvent,
+				widget,
+				path,
+				background,
+				cellArea,
+				flags
+			);
 		}
 
 		private CellRenderer Renderer
 		{
 			get 
 			{
-				if (CellType == CellType.Combo)
+				switch(CellType)
 				{
+				case CellType.Combo:
 					return comboRenderer;
+				case CellType.Text:
+					return textRenderer;
+				default:
+					return null;
 				}
-
-				return textRenderer; 
 			}
 		}
 
@@ -79,15 +107,16 @@ namespace EternalDusk
 
 		public CellRendererMulti() : base()
 		{
-			// Build Combo Options
-			comboChoices = new ListStore (typeof(string));
-			comboChoices.AppendValues("Choice A");
-			comboChoices.AppendValues("Choice B");
-			comboChoices.AppendValues("Choice C");
+			comboRenderer = new CellRendererCombo();
+			comboRenderer.Edited += new EditedHandler(EditedCallback);
 
-			Model = comboChoices;
-			TextColumn = 0;
-			Mode = CellRendererMode.Editable;
+			textRenderer = new CellRendererText();
+			textRenderer.Edited += new EditedHandler(EditedCallback);
+		}
+
+		protected void EditedCallback (object sender, EditedArgs args)
+		{
+			edited(sender, args);
 		}
 
 		public void Update()
@@ -95,27 +124,20 @@ namespace EternalDusk
 			switch (CellType)
 			{
 			case CellType.Combo:
-				comboRenderer = new CellRendererCombo();
 				comboRenderer.Model = Model;
 				comboRenderer.TextColumn = TextColumn;
 				comboRenderer.Editable = Editable;
-				foreach (EditedHandler handler in Edited.GetInvocationList())
-				{
-					comboRenderer.Edited += handler;
-				}
 				comboRenderer.Text = Text;
 				break;
 			case CellType.Text:
-				textRenderer = new CellRendererText();
 				textRenderer.Editable = Editable;
-				foreach (EditedHandler handler in Edited.GetInvocationList())
-				{
-					textRenderer.Edited += handler;
-				}
 				textRenderer.Text = Text;
 				break;
 			}
-			//Renderer.Mode = CellRendererMode.Activatable;
+			if (Editable)
+			{
+				Mode = CellRendererMode.Editable;
+			}
 		}
 	}
 }

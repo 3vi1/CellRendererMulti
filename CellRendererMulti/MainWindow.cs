@@ -9,15 +9,6 @@ public enum Columns
 	CellType = 2
 }
 
-/// <summary>
-/// These are the types of cells our renderer supports.
-/// </summary>
-public enum CellType
-{
-	Combo,
-	Text
-}
-	
 [TreeNode (ListOnly=true)]
 public class MyTreeNode : TreeNode {
 
@@ -29,13 +20,13 @@ public class MyTreeNode : TreeNode {
 
 	// Note: This is a hidden column (not added to view).  --3vi1
 	[TreeNodeValue (Column=(int)Columns.CellType)]
-	public CellType ValueType;
+	public CellType MyValueCellType;
 
-	public MyTreeNode (string newAttribute, string newValue, CellType valueType)
+	public MyTreeNode (string myAttribute, string myValue, CellType myValueCellType)
 	{
-		MyAttribute = newAttribute;
-		MyValue = newValue;
-		ValueType = valueType;
+		MyAttribute = myAttribute;
+		MyValue = myValue;
+		MyValueCellType = myValueCellType;
 	}
 }
 
@@ -46,7 +37,12 @@ public partial class MainWindow: Gtk.Window
 		Build();
 
 		// Add our Attribute column.
-		nodeview1.AppendColumn("Attribute", new CellRendererText(), "text", (int)Columns.Attribute);
+		nodeView.AppendColumn(
+			"Attribute",
+			new CellRendererText(),
+			"text",
+			(int) Columns.Attribute
+		);
 
 		// Define some test types that will be in the dropdown combo.
 		ListStore storeTypes = new ListStore (typeof(string));
@@ -61,7 +57,7 @@ public partial class MainWindow: Gtk.Window
 		myRenderer.TextColumn = 0;
 		myRenderer.Editable = true;
 		myRenderer.Edited += new EditedHandler(TypeEdited);
-		TreeViewColumn column = nodeview1.AppendColumn (
+		TreeViewColumn column = nodeView.AppendColumn (
 			"Value",
 			myRenderer,
 			"text",
@@ -72,7 +68,7 @@ public partial class MainWindow: Gtk.Window
 		// Note:  Do not add the hidden column that determines cell type. --3vi1
 
 		// Attach the view to the data model/store.
-		nodeview1.NodeStore = Store;
+		nodeView.NodeStore = Store;
 	}
 
 	// Our data store.
