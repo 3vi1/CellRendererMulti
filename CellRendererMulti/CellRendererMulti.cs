@@ -19,7 +19,28 @@ namespace EternalDusk
 	public class CellRendererMulti : CellRenderer
 	{
 		public CellType CellType		{ get; set; }
-		public bool Editable 			{ get; set; }
+
+		public bool Editable
+		{
+			get {
+				return (Renderer as CellRendererText).Editable;
+			}
+
+			set {
+				// Set all subrenderers to value
+				textRenderer.Editable = value;
+				comboRenderer.Editable = value;
+
+				if (value == true)
+				{
+					Mode = CellRendererMode.Editable;
+				}
+				else
+				{
+					Mode = CellRendererMode.Activatable & CellRendererMode.Inert;
+				}
+			}
+		}
 
 		private event EditedHandler edited;
 		public event EditedHandler Edited
@@ -28,11 +49,42 @@ namespace EternalDusk
 			remove	{ edited -= value; } 
 		}
 
-		public TreeModel Model 			{ get; set; }
-		public int TextColumn			{ get; set; }
+		[GLib.Property ("model")]
+		public TreeModel Model
+		{
+			get {
+				return comboRenderer.Model;
+			}
+
+			set {
+				comboRenderer.Model = value;
+			}
+		}
+
+		[GLib.Property ("text-column")]
+		public int TextColumn
+		{
+			get {
+				return comboRenderer.TextColumn;
+			}
+
+			set {
+				comboRenderer.TextColumn = value;
+			}
+		}
+
 
 		[GLib.Property ("text")]
-		public string Text 		{ get; set; }
+		public string Text 		
+		{ 
+			get {
+				return (Renderer as CellRendererText).Text; 
+			}
+			set {
+				textRenderer.Text = value;
+				comboRenderer.Text = value;
+			}
+		}
 
 		public override void GetSize (
 			Widget widget,
@@ -43,8 +95,6 @@ namespace EternalDusk
 			out int height)
 		{
 			base.GetSize (widget, ref cell_area, out x_offset, out y_offset, out width, out height);
-			width = 150;
-			// TODO:  Autogrow
 		}
 
 		public override CellEditable StartEditing(
@@ -114,30 +164,9 @@ namespace EternalDusk
 			textRenderer.Edited += new EditedHandler(EditedCallback);
 		}
 
-		protected void EditedCallback (object sender, EditedArgs args)
+		private void EditedCallback (object sender, EditedArgs args)
 		{
 			edited(sender, args);
-		}
-
-		public void Update()
-		{
-			switch (CellType)
-			{
-			case CellType.Combo:
-				comboRenderer.Model = Model;
-				comboRenderer.TextColumn = TextColumn;
-				comboRenderer.Editable = Editable;
-				comboRenderer.Text = Text;
-				break;
-			case CellType.Text:
-				textRenderer.Editable = Editable;
-				textRenderer.Text = Text;
-				break;
-			}
-			if (Editable)
-			{
-				Mode = CellRendererMode.Editable;
-			}
 		}
 	}
 }

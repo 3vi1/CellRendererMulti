@@ -6,7 +6,8 @@ public enum Columns
 {
 	Attribute = 0,
 	Value = 1,
-	CellType = 2
+	CellType = 2,
+	ComboStore = 3
 }
 
 [TreeNode (ListOnly=true)]
@@ -18,20 +19,30 @@ public class MyTreeNode : TreeNode {
 	[TreeNodeValue (Column=(int)Columns.Value)]
 	public string MyValue;
 
-	// Note: This is a hidden column (not added to view).  --3vi1
+	// Note: The following are hidden columns (not added to view).  --3vi1
 	[TreeNodeValue (Column=(int)Columns.CellType)]
 	public CellType MyValueCellType;
 
-	public MyTreeNode (string myAttribute, string myValue, CellType myValueCellType)
-	{
+	[TreeNodeValue (Column=(int)Columns.ComboStore)]
+	public ListStore comboStore;
+
+	public MyTreeNode (
+		string myAttribute,
+		string myValue,
+		CellType myValueCellType,
+		ListStore comboStore
+	) {
 		MyAttribute = myAttribute;
 		MyValue = myValue;
 		MyValueCellType = myValueCellType;
+		this.comboStore = comboStore;
 	}
 }
 
 public partial class MainWindow: Gtk.Window
 {
+	ListStore makeChoices, modelChoices;
+
 	public MainWindow() : base(Gtk.WindowType.Toplevel)
 	{
 		Build();
@@ -44,16 +55,19 @@ public partial class MainWindow: Gtk.Window
 			(int) Columns.Attribute
 		);
 
-		// Define some test types that will be in the dropdown combo.
-		ListStore storeTypes = new ListStore (typeof(string));
-		storeTypes.AppendValues("test1");
-		storeTypes.AppendValues("test2");
-		storeTypes.AppendValues("test3");
+		// Define some test types that will be in the dropdown combos.
+		makeChoices = new ListStore (typeof(string));
+		makeChoices.AppendValues("Chevy");
+		makeChoices.AppendValues("Ford");
+		makeChoices.AppendValues("Plymouth");
+
+		modelChoices = new ListStore (typeof(string));
+		modelChoices.AppendValues("Camaro");
+		modelChoices.AppendValues("Fury");
+		modelChoices.AppendValues("Mustang");
 
 		// Add our Value Column
-		//CellRendererCombo myRenderer = new CellRendererCombo();
 		CellRendererMulti myRenderer = new CellRendererMulti();
-		myRenderer.Model = storeTypes;
 		myRenderer.TextColumn = 0;
 		myRenderer.Editable = true;
 		myRenderer.Edited += new EditedHandler(TypeEdited);
@@ -63,9 +77,9 @@ public partial class MainWindow: Gtk.Window
 			"text",
 			(int)Columns.Value
 		);
-		column.SetCellDataFunc(myRenderer, MyCellDataFunc);
+		column.SetCellDataFunc(myRenderer, MultiCellDataFunc);
 
-		// Note:  Do not add the hidden column that determines cell type. --3vi1
+		// Note:  Do not add the hidden columns. --3vi1
 
 		// Attach the view to the data model/store.
 		nodeView.NodeStore = Store;
@@ -77,15 +91,21 @@ public partial class MainWindow: Gtk.Window
 		get {
 			if (store == null) {
 				store = new NodeStore (typeof (MyTreeNode));
-				store.AddNode (new MyTreeNode ("Text 1", "Combo 1", CellType.Combo));
-				store.AddNode (new MyTreeNode ("Text 2", "Combo 2", CellType.Combo));
-				store.AddNode (new MyTreeNode ("Text 3", "Text 4", CellType.Text));
+				store.AddNode (
+					new MyTreeNode ("Car", "Christine", CellType.Text, null)
+				);
+				store.AddNode (
+					new MyTreeNode ("Make", "Plymouth", CellType.Combo, makeChoices)
+				);
+				store.AddNode (
+					new MyTreeNode ("Model", "Fury", CellType.Combo, modelChoices)
+				);
 			}
 			return store;
 		}
 	}
 
-	private void MyCellDataFunc(
+	private void MultiCellDataFunc(
 		TreeViewColumn column,
 		CellRenderer cell,
 		TreeModel model,
@@ -94,27 +114,20 @@ public partial class MainWindow: Gtk.Window
 		string cellValue = (string) model.GetValue (iter, (int)Columns.Value);
 		CellType cellType = (CellType) model.GetValue (iter, (int)Columns.CellType);
 		(cell as CellRendererMulti).CellType = cellType;
+		if(cellType == CellType.Combo)
+		{
+			ListStore comboStore = (ListStore) model.GetValue(iter, (int) Columns.ComboStore);
+			(cell as CellRendererMulti).Model = comboStore;
+		}
 		(cell as CellRendererMulti).Text = cellValue;
-		(cell as CellRendererMulti).Update();
-		//column.SetAttributes(cell, "text", (int)Columns.Value);
-		//column.PackStart(cell, true);
 	}
 
 	protected void TypeEdited (object sender, EditedArgs args)
 	{
-		TreeIter iter;
-		/*if (store.GetIterFromString (out iter, args.Path)) {
-			foreach (string name in Enum.GetNames (typeof (TriggerType))) {
-				if (args.NewText == name) {
-					store.SetValue (iter, colTypeIndex, args.NewText);
-					EmitContentChanged ();
-					return;
-				}
-			}
-			string oldText = store.GetValue (iter, colTypeIndex) as string;
-			(sender as CellRendererText).Text = oldText;
-		}*/
+		MyTreeNode node = Store.GetNode(new Gtk.TreePath(args.Path)) as MyTreeNode;
+		node.MyValue = args.NewText;
 	}
+
 	protected void OnDeleteEvent(object sender, DeleteEventArgs a)
 	{
 		Application.Quit();
